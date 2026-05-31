@@ -1,0 +1,192 @@
+#include<iostream.h>
+#include<fstream.h>
+#include<conio.h>
+ 
+class Bank
+{
+   int accno;
+   char name[50];
+   float balance;
+ 
+public:
+   void create_account();
+   void show_account();
+   void deposit(float);
+   void withdraw(float);
+   int get_accno();
+};
+ 
+void Bank::create_account()
+{
+   cout<<"\nEnter Account Number: ";
+   cin>>accno;
+ 
+   cout<<"Enter Customer Name: ";
+   cin>>name;
+ 
+   cout<<"Enter Initial Balance: ";
+   cin>>balance;
+}
+ 
+void Bank::show_account()
+{
+   cout<<"\nAccount Number : "<<accno;
+   cout<<"\nCustomer Name  : "<<name;
+   cout<<"\nBalance        : "<<balance<<endl;
+}
+ 
+void Bank::deposit(float amt)
+{
+   balance = balance + amt;
+}
+ 
+void Bank::withdraw(float amt)
+{
+   if(balance >= amt)
+       balance = balance - amt;
+   else
+       cout<<"\nInsufficient Balance";
+}
+ 
+int Bank::get_accno()
+{
+   return accno;
+}
+ 
+void createAccount()
+{
+   Bank b;
+   ofstream file;
+ 
+   file.open("bank.dat", ios::binary | ios::app);
+ 
+   b.create_account();
+ 
+   file.write((char*)&b, sizeof(b));
+ 
+   file.close();
+ 
+   cout<<"\nAccount Created Successfully";
+}
+ 
+void displayAccount(int num)
+{
+   Bank b;
+   ifstream file;
+ 
+   file.open("bank.dat", ios::binary);
+ 
+   int found=0;
+ 
+   while(file.read((char*)&b,sizeof(b)))
+   {
+       if(b.get_accno()==num)
+       {
+           b.show_account();
+           found=1;
+       }
+   }
+ 
+   if(found==0)
+       cout<<"\nAccount not found";
+ 
+   file.close();
+}
+ 
+void transaction(int num,int type)
+{
+   Bank b;
+   fstream file;
+ 
+   file.open("bank.dat", ios::binary | ios::in | ios::out);
+ 
+   int found=0;
+   float amt;
+ 
+   while(file.read((char*)&b,sizeof(b)))
+   {
+       if(b.get_accno()==num)
+       {
+           b.show_account();
+ 
+           cout<<"\nEnter Amount: ";
+           cin>>amt;
+ 
+           if(type==1)
+               b.deposit(amt);
+           else
+               b.withdraw(amt);
+ 
+           int pos = (-1) * sizeof(b);
+           file.seekp(pos, ios::cur);
+ 
+           file.write((char*)&b,sizeof(b));
+ 
+           cout<<"\nTransaction Successful";
+           found=1;
+           break;
+       }
+   }
+ 
+   if(found==0)
+       cout<<"\nRecord Not Found";
+ 
+   file.close();
+}
+ 
+int main()
+{
+   int choice, num;
+ 
+   do
+   {
+       clrscr();
+ 
+       cout<<"\n===== BANK MANAGEMENT SYSTEM =====";
+       cout<<"\n1. Create Account";
+       cout<<"\n2. Deposit Money";
+       cout<<"\n3. Withdraw Money";
+       cout<<"\n4. Display Account";
+       cout<<"\n5. Exit";
+ 
+       cout<<"\nEnter Choice: ";
+       cin>>choice;
+ 
+       switch(choice)
+       {
+           case 1:
+               createAccount();
+               break;
+ 
+           case 2:
+               cout<<"\nEnter Account Number: ";
+               cin>>num;
+               transaction(num,1);
+               break;
+ 
+           case 3:
+               cout<<"\nEnter Account Number: ";
+               cin>>num;
+               transaction(num,2);
+               break;
+ 
+           case 4:
+               cout<<"\nEnter Account Number: ";
+               cin>>num;
+               displayAccount(num);
+               break;
+ 
+           case 5:
+               cout<<"\nThank You!";
+               break;
+ 
+           default:
+               cout<<"\nInvalid Choice";
+       }
+ 
+       getch();
+ 
+   }while(choice!=5);
+ 
+   return 0;
+}
